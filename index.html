@@ -50,48 +50,61 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamh0ZnNvbXJ5b2R4dXl2bWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE3MDksImV4cCI6MjA4NDQwNzcwOX0.5ekbm_d1vqqLtrI8NF866OkNLs7uYPj2hi2T3tFUFUk";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-    const container = document.getElementById("recettes");
-    const select = document.getElementById("niveau");
+  const BUCKET_NAME = "recettes";
 
-    async function loadRecettes(niveau = "") {
-      container.innerHTML = "Chargement...";
+  const container = document.getElementById("recettes");
+  const select = document.getElementById("niveau");
 
-      let query = supabase
-        .from("recette")
-        .select("titre, niveau, image_url, pdf_url");
+  function getPublicUrl(path) {
+    return supabase
+      .storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(path).data.publicUrl;
+  }
 
-      if (niveau) {
-        query = query.eq("niveau", niveau);
-      }
+  async function loadRecettes(niveau = "") {
+    container.innerHTML = "Chargement...";
 
-      const { data, error } = await query;
+    let query = supabase
+      .from("recette")
+      .select("titre, niveau, image_path, pdf_path");
 
-      if (error) {
-        container.innerHTML = "Erreur de chargement";
-        console.error(error);
-        return;
-      }
-
-      container.innerHTML = "";
-
-      data.forEach(r => {
-        container.innerHTML += `
-          <div class="card">
-            <a href="${r.pdf_url}" target="_blank">
-              <img src="${r.image_url}" alt="${r.titre}">
-            </a>
-            <p>${r.titre}</p>
-          </div>
-        `;
-      });
+    if (niveau) {
+      query = query.eq("niveau", niveau);
     }
 
-    select.addEventListener("change", e => {
-      loadRecettes(e.target.value);
+    const { data, error } = await query;
+
+    if (error) {
+      container.innerHTML = "Erreur";
+      console.error(error);
+      return;
+    }
+
+    container.innerHTML = "";
+
+    data.forEach(r => {
+      const imageUrl = getPublicUrl(r.image_path);
+      const pdfUrl = getPublicUrl(r.pdf_path);
+
+      container.innerHTML += `
+        <div class="card">
+          <a href="${pdfUrl}" target="_blank">
+            <img src="${imageUrl}" alt="${r.titre}">
+          </a>
+          <p>${r.titre}</p>
+        </div>
+      `;
     });
+  }
 
-    loadRecettes();
-  </script>
+  select.addEventListener("change", e => {
+    loadRecettes(e.target.value);
+  });
 
+  loadRecettes();
+</script>
+
+   
 </body>
 </html>
