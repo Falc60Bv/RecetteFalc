@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Recettes</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    select {
+      padding: 8px;
+      margin-bottom: 20px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .card {
+      text-align: center;
+    }
+    .card img {
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Recettes</h1>
+
+  <!-- MENU -->
+  <select id="niveau">
+    <option value="">Toutes les recettes</option>
+    <option value="faible">Faible</option>
+    <option value="moyen">Moyen</option>
+    <option value="dur">Dur</option>
+  </select>
+
+  <!-- LISTE -->
+  <div id="recettes" class="grid"></div>
+
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script>
+    const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
+    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamh0ZnNvbXJ5b2R4dXl2bWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE3MDksImV4cCI6MjA4NDQwNzcwOX0.5ekbm_d1vqqLtrI8NF866OkNLs7uYPj2hi2T3tFUFUk";
+    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+    const container = document.getElementById("recettes");
+    const select = document.getElementById("niveau");
+
+    async function loadRecettes(niveau = "") {
+      container.innerHTML = "Chargement...";
+
+      let query = supabase
+        .from("recette")
+        .select("titre, niveau, image_url, pdf_url");
+
+      if (niveau) {
+        query = query.eq("niveau", niveau);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        container.innerHTML = "Erreur de chargement";
+        console.error(error);
+        return;
+      }
+
+      container.innerHTML = "";
+
+      data.forEach(r => {
+        container.innerHTML += `
+          <div class="card">
+            <a href="${r.pdf_url}" target="_blank">
+              <img src="${r.image_url}" alt="${r.titre}">
+            </a>
+            <p>${r.titre}</p>
+          </div>
+        `;
+      });
+    }
+
+    select.addEventListener("change", e => {
+      loadRecettes(e.target.value);
+    });
+
+    loadRecettes();
+  </script>
+
+</body>
+</html>
