@@ -62,26 +62,21 @@
       .getPublicUrl(path).data.publicUrl;
   }
 
-  async function loadRecettes(niveau = "") {
-    container.innerHTML = "Chargement...";
+async function loadRecettes() {
+  container.innerHTML = "Chargement...";
 
-    let query = supabase
-      .from("recette")
-      .select("titre, niveau, image_path, pdf_path");
+  const { data, error } = await supabase
+    .from("recette")
+    .select("titre, image_path, pdf_path");
 
-    if (niveau) {
-      query = query.eq("niveau", niveau);
-    }
+  if (error) {
+    container.innerHTML = "Erreur";
+    console.error(error);
+    return;
+  }
 
-    const { data, error } = await query;
-
-    if (error) {
-      container.innerHTML = "Erreur";
-      console.error(error);
-      return;
-    }
-
-    container.innerHTML = "";
+  container.innerHTML = "";
+}
 
     data.forEach(r => {
       const imageUrl = getPublicUrl(r.image_path);
