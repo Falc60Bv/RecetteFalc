@@ -54,23 +54,21 @@
         .data.publicUrl;
     }
 
-    async function loadRecettes() {
-      container.innerHTML = "Chargement...";
+async function loadRecettes() {
+  console.log("Début du chargement des recettes...");
 
-      const { data, error } = await supabase
-        .from("recettes")
-        .select("titre");
+  const { data, error } = await supabase
+    .from("recette")
+    .select("titre, image_path, pdf_path");
 
-      if (error) {
-        console.error(error);
-        container.innerHTML = "Erreur lors du chargement";
-        return;
-      }
+  if (error) {
+    console.error("Erreur Supabase :", error);
+    return;
+  }
 
-      if (!data || data.length === 0) {
-        container.innerHTML = "Aucune recette trouvée";
-        return;
-      }
+  console.log("Data reçue :", data);
+}
+
 
       container.innerHTML = "";
 
