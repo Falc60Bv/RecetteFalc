@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Recettes Falc de Sylvie 2</title>
+  <title>Recettes Falc de Sylvie 3</title>
 
   <style>
     body {
@@ -30,7 +30,7 @@
 
 <body>
 
-  <h1>Recettes Falc de Sylvie 2</h1>
+  <h1>Recettes Falc de Sylvie 3b</h1>
 
   <div id="recettes" class="grid"></div>
 
@@ -59,7 +59,7 @@
 
       const { data, error } = await supabase
         .from("recettes")
-        .select("titre, image_path, pdf_path");
+        .select("titre");
 
       if (error) {
         console.error(error);
@@ -75,8 +75,8 @@
       container.innerHTML = "";
 
       data.forEach(r => {
-        const imageUrl = getPublicUrl(r.image_path);
-        const pdfUrl = getPublicUrl(r.pdf_path);
+'        const imageUrl = getPublicUrl(r.image_path);
+'        const pdfUrl = getPublicUrl(r.pdf_path);
 
         const card = document.createElement("div");
         card.className = "card";
