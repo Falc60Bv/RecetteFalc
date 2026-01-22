@@ -58,7 +58,7 @@
       container.innerHTML = "Chargement...";
 
       const { data, error } = await supabase
-        .from("recette")
+        .from("recettes")
         .select("titre, image_path, pdf_path");
 
       if (error) {
