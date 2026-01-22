@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <title>Recettes Falc de Sylvie</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
     }
-    select {
-      padding: 8px;
-      margin-bottom: 20px;
-    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
     }
+
     .card {
       text-align: center;
     }
+
     .card img {
       width: 100%;
       border-radius: 8px;
@@ -27,79 +27,62 @@
     }
   </style>
 </head>
+
 <body>
 
   <h1>Recettes Falc de Sylvie</h1>
 
-  <!-- MENU -->
-  <select id="niveau">
-    <option value="">Toutes les recettes</option>
-    <option value="Facile">Facile</option>
-    <option value="moyen">Moyen</option>
-    <option value="dur">Dur</option>
-  </select>
-
-  <!-- LISTE -->
   <div id="recettes" class="grid"></div>
 
   <!-- SUPABASE -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <script>
+    // CONFIG SUPABASE
     const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamh0ZnNvbXJ5b2R4dXl2bWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE3MDksImV4cCI6MjA4NDQwNzcwOX0.5ekbm_d1vqqLtrI8NF866OkNLs7uYPj2hi2T3tFUFUk";
+    const supabaseKey = "TON_ANON_PUBLIC_KEY";
     const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  const BUCKET_NAME = "recettes";
+    const BUCKET_NAME = "recettes";
+    const container = document.getElementById("recettes");
 
-  const container = document.getElementById("recettes");
-  const select = document.getElementById("niveau");
+    function getPublicUrl(path) {
+      return supabase
+        .storage
+        .from(BUCKET_NAME)
+        .getPublicUrl(path)
+        .data.publicUrl;
+    }
 
-  function getPublicUrl(path) {
-    return supabase
-      .storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(path).data.publicUrl;
-  }
+    async function loadRecettes() {
+      container.innerHTML = "Chargement...";
 
-async function loadRecettes() {
-  container.innerHTML = "Chargement...";
+      const { data, error } = await supabase
+        .from("recette")
+        .select("titre, image_path, pdf_path");
 
-  const { data, error } = await supabase
-    .from("recette")
-    .select("titre, image_path, pdf_path");
+      if (error) {
+        console.error(error);
+        container.innerHTML = "Erreur lors du chargement";
+        return;
+      }
 
-  if (error) {
-    container.innerHTML = "Erreur";
-    console.error(error);
-    return;
-  }
+      if (!data || data.length === 0) {
+        container.innerHTML = "Aucune recette trouvée";
+        return;
+      }
 
-  container.innerHTML = "";
-}
+      container.innerHTML = "";
 
-    data.forEach(r => {
-      const imageUrl = getPublicUrl(r.image_path);
-      const pdfUrl = getPublicUrl(r.pdf_path);
+      data.forEach(r => {
+        const imageUrl = getPublicUrl(r.image_path);
+        const pdfUrl = getPublicUrl(r.pdf_path);
 
-      container.innerHTML += `
-        <div class="card">
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `
           <a href="${pdfUrl}" target="_blank">
             <img src="${imageUrl}" alt="${r.titre}">
           </a>
           <p>${r.titre}</p>
-        </div>
-      `;
-    });
-  }
-
-  select.addEventListener("change", e => {
-    loadRecettes(e.target.value);
-  });
-
-  loadRecettes();
-</script>
-
-   
-</body>
-</html>
