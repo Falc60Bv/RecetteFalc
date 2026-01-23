@@ -41,7 +41,7 @@
 </head>
 <body>
 
-<h1>Recettes Falc de Sylvie 12</h1>
+<h1>Recettes Falc de Sylvie 12A</h1>
 <div id="recettes" class="grid"></div>
 
 <!-- SUPABASE v1 CDN -->
@@ -49,32 +49,19 @@
 
 <script>
   // --- CONFIGURATION SUPABASE ---
-  
   const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
   const supabaseKey = "sb_publishable_A0QPpyxyoDHt5uVB4cTnbw_uLJDWKKd";
-
   const client = supabase.createClient(supabaseUrl, supabaseKey);
 
-  const BUCKET_NAME = "recettes";
   const container = document.getElementById("recettes");
-
-  // --- Fonction pour générer l'URL publique d'un fichier dans Supabase Storage ---
-  function getPublicUrl(path) {
-    if (!path) return ""; 
-    const { publicURL } = client.storage.from(BUCKET_NAME).getPublicUrl(path);
-    return publicURL || "";
-  }
 
   // --- Chargement des recettes ---
   async function loadRecettes() {
-    console.log("Connexion à Supabase...");
-    
     const { data, error } = await client
       .from("recettes")
       .select("nom, image_url, pdf_url");
 
     if (error) {
-      console.error("Erreur Supabase :", error);
       container.innerHTML = `<p style="color:red;">Erreur Supabase : ${error.message}</p>`;
       return;
     }
@@ -87,24 +74,20 @@
     container.innerHTML = "";
 
     data.forEach(r => {
-      const imageUrl = getPublicUrl(r.image_path);
-      const pdfUrl = getPublicUrl(r.pdf_path);
-
       const card = document.createElement("div");
       card.className = "card";
 
       card.innerHTML = `
-        <a href="${pdfUrl}" target="_blank">
-          <img src="${imageUrl}" alt="${r.titre}">
+        <a href="${r.pdf_url}" target="_blank">
+          <img src="${r.image_url}" alt="${r.nom}">
         </a>
-        <p>${r.titre}</p>
+        <p>${r.nom}</p>
       `;
 
       container.appendChild(card);
     });
   }
 
-  // --- Appel de la fonction ---
   loadRecettes();
 </script>
 
