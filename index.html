@@ -41,7 +41,7 @@
 </head>
 <body>
 
-<h1>Recettes Falc de Sylvie 11</h1>
+<h1>Recettes Falc de Sylvie 12</h1>
 <div id="recettes" class="grid"></div>
 
 <!-- SUPABASE v1 CDN -->
@@ -70,7 +70,7 @@
     console.log("Connexion à Supabase...");
     
     const { data, error } = await client
-      .from("recette")
+      .from("recettes")
       .select("nom, image_url, pdf_url");
 
     if (error) {
