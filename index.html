@@ -3,65 +3,84 @@
 <head>
   <meta charset="UTF-8" />
   <title>Recettes Falc de Sylvie</title>
-
   <style>
     body {
       font-family: Arial, sans-serif;
       padding: 20px;
+      max-width: 1200px;
+      margin: auto;
     }
-
+    h1 {
+      text-align: center;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
     }
-
     .card {
       text-align: center;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      transition: transform 0.2s;
     }
-
+    .card:hover {
+      transform: scale(1.03);
+    }
     .card img {
       width: 100%;
       border-radius: 8px;
       cursor: pointer;
     }
+    .card p {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
-
 <body>
 
-<h1>Recettes Falc de Sylvie 9b</h1>
+<h1>Recettes Falc de Sylvie 11</h1>
 <div id="recettes" class="grid"></div>
 
-<!-- SUPABASE -->
+<!-- SUPABASE v1 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.6"></script>
 
 <script>
+  // --- CONFIGURATION SUPABASE ---
+  
   const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
   const supabaseKey = "sb_publishable_A0QPpyxyoDHt5uVB4cTnbw_uLJDWKKd";
-    
-     const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+  const client = supabase.createClient(supabaseUrl, supabaseKey);
 
   const BUCKET_NAME = "recettes";
   const container = document.getElementById("recettes");
 
+  // --- Fonction pour générer l'URL publique d'un fichier dans Supabase Storage ---
   function getPublicUrl(path) {
-    return client
-      .storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(path)
-      .data.publicUrl;
+    if (!path) return ""; 
+    const { publicURL } = client.storage.from(BUCKET_NAME).getPublicUrl(path);
+    return publicURL || "";
   }
 
+  // --- Chargement des recettes ---
   async function loadRecettes() {
     console.log("Connexion à Supabase...");
-
+    
     const { data, error } = await client
-      .from("recettes")
+      .from("recette")
       .select("nom, image_url, pdf_url");
 
     if (error) {
       console.error("Erreur Supabase :", error);
+      container.innerHTML = `<p style="color:red;">Erreur Supabase : ${error.message}</p>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      container.innerHTML = `<p>Aucune recette trouvée.</p>`;
       return;
     }
 
@@ -85,6 +104,7 @@
     });
   }
 
+  // --- Appel de la fonction ---
   loadRecettes();
 </script>
 
