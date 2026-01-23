@@ -12,7 +12,7 @@
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) ;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
     }
 
@@ -30,57 +30,62 @@
 
 <body>
 
-  <h1>Recettes Falc de Sylvie 4</h1>
+<h1>Recettes Falc de Sylvie</h1>
+<div id="recettes" class="grid"></div>
 
-  <div id="recettes" class="grid"></div>
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- SUPABASE -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamh0ZnNvbXJ5b2R4dXl2bWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE3MDksImV4cCI6MjA4NDQwNzcwOX0.5ekbm_d1vqqLtrI8NF866OkNLs7uYPj2hi2T3tFUFUk"; // OK pour test public
+  const client = Supabase.createClient(supabaseUrl, supabaseKey);
 
-  <script>
-    // CONFIG SUPABASE
-    const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
-    const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamh0ZnNvbXJ5b2R4dXl2bWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE3MDksImV4cCI6MjA4NDQwNzcwOX0.5ekbm_d1vqqLtrI8NF866OkNLs7uYPj2hi2T3tFUFUk";
-    const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  const BUCKET_NAME = "recettes";
+  const container = document.getElementById("recettes");
 
-    const BUCKET_NAME = "recettes";
-    const container = document.getElementById("recettes");
-
-    function getPublicUrl(path) {
-      return supabase
-        .storage
-        .from(BUCKET_NAME)
-        .getPublicUrl(path)
-        .data.publicUrl;
-    }
-
-async function loadRecettes() {
-  console.log("Début du chargement des recettes...");
-
-  const { data, error } = await supabase
-    .from("recette")
-    .select("titre, image_path, pdf_path");
-
-  if (error) {
-    console.error("Erreur Supabase :", error);
-    return;
+  function getPublicUrl(path) {
+    return client
+      .storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(path)
+      .data.publicUrl;
   }
 
-  console.log("Data reçue :", data);
-}
+  async function loadRecettes() {
+    console.log("Connexion à Supabase...");
 
+    const { data, error } = await client
+      .from("recette")
+      .select("titre, image_path, pdf_path");
 
-      container.innerHTML = "";
+    if (error) {
+      console.error("Erreur Supabase :", error);
+      return;
+    }
 
-      data.forEach(r => {
-'        const imageUrl = getPublicUrl(r.image_path);
-'        const pdfUrl = getPublicUrl(r.pdf_path);
+    container.innerHTML = "";
 
-        const card = document.createElement("div");
-        card.className = "card";
+    data.forEach(r => {
+      const imageUrl = getPublicUrl(r.image_path);
+      const pdfUrl = getPublicUrl(r.pdf_path);
 
-        card.innerHTML = `
-          <a href="${pdfUrl}" target="_blank">
-            <img src="${imageUrl}" alt="${r.titre}">
-          </a>
-          <p>${r.titre}</p>
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <a href="${pdfUrl}" target="_blank">
+          <img src="${imageUrl}" alt="${r.titre}">
+        </a>
+        <p>${r.titre}</p>
+      `;
+
+      container.appendChild(card);
+    });
+  }
+
+  loadRecettes();
+</script>
+
+</body>
+</html>
