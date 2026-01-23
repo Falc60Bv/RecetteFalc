@@ -2,7 +2,8 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Recettes Falc de Sylvie</title>
+  <title>Recettes FALC de Sylvie</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,29 +11,38 @@
       max-width: 1200px;
       margin: auto;
     }
+
     h1 {
       text-align: center;
+      margin-bottom: 30px;
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 20px;
     }
+
     .card {
       text-align: center;
       border: 1px solid #ddd;
       border-radius: 8px;
       padding: 10px;
       transition: transform 0.2s;
+      background: #fff;
     }
+
     .card:hover {
       transform: scale(1.03);
     }
+
     .card img {
       width: 100%;
+      height: auto;
       border-radius: 8px;
       cursor: pointer;
     }
+
     .card p {
       margin-top: 10px;
       font-weight: bold;
@@ -41,47 +51,69 @@
 </head>
 <body>
 
-<h1>Recettes Falc de Sylvie 12A</h1>
+<h1>Recettes FALC de Sylvie 12B</h1>
+
 <div id="recettes" class="grid"></div>
 
-<!-- SUPABASE v1 CDN -->
+<!-- Supabase v1 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.6"></script>
 
 <script>
-  // --- CONFIGURATION SUPABASE ---
+  // ===============================
+  // CONFIGURATION SUPABASE
+  // ===============================
   const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
   const supabaseKey = "sb_publishable_A0QPpyxyoDHt5uVB4cTnbw_uLJDWKKd";
   const client = supabase.createClient(supabaseUrl, supabaseKey);
 
+  const BUCKET_NAME = "recettes";
   const container = document.getElementById("recettes");
 
-  // --- Chargement des recettes ---
+  // ===============================
+  // FONCTION URL PUBLIQUE STORAGE
+  // ===============================
+  function getPublicUrl(path) {
+    if (!path) return "";
+    const { publicURL } = client
+      .storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(path);
+    return publicURL;
+  }
+
+  // ===============================
+  // CHARGEMENT DES RECETTES
+  // ===============================
   async function loadRecettes() {
     const { data, error } = await client
       .from("recettes")
       .select("nom, image_url, pdf_url");
 
     if (error) {
-      container.innerHTML = `<p style="color:red;">Erreur Supabase : ${error.message}</p>`;
+      container.innerHTML = `<p style="color:red;">Erreur : ${error.message}</p>`;
+      console.error(error);
       return;
     }
 
     if (!data || data.length === 0) {
-      container.innerHTML = `<p>Aucune recette trouvée.</p>`;
+      container.innerHTML = "<p>Aucune recette trouvée.</p>";
       return;
     }
 
     container.innerHTML = "";
 
-    data.forEach(r => {
+    data.forEach(recette => {
+      const imageUrl = getPublicUrl(recette.image_url);
+      const pdfUrl = getPublicUrl(recette.pdf_url);
+
       const card = document.createElement("div");
       card.className = "card";
 
       card.innerHTML = `
-        <a href="${r.pdf_url}" target="_blank">
-          <img src="${r.image_url}" alt="${r.nom}">
+        <a href="${pdfUrl}" target="_blank">
+          <img src="${imageUrl}" alt="${recette.nom}">
         </a>
-        <p>${r.nom}</p>
+        <p>${recette.nom}</p>
       `;
 
       container.appendChild(card);
