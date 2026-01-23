@@ -34,15 +34,13 @@
 <div id="recettes" class="grid"></div>
 
 <!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1.35.6"></script>
 
 <script>
   const supabaseUrl = "https://fhjhtfsomryodxuyvmjd.supabase.co";
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZoamh0ZnNvbXJ5b2R4dXl2bWpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4MzE3MDksImV4cCI6MjA4NDQwNzcwOX0.5ekbm_d1vqqLtrI8NF866OkNLs7uYPj2hi2T3tFUFUkN";
 
-  const client = Supabase.createClient(supabaseUrl, supabaseKey);
+    const client = supabase.createClient(supabaseUrl, supabaseKey);
 
   const BUCKET_NAME = "recettes";
   const container = document.getElementById("recettes");
